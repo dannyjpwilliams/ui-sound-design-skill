@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Sound Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; color: #e5e5e5; min-height: 100vh; padding: 2rem; }
+  h1 { font-size: 1.25rem; font-weight: 500; margin-bottom: 1.5rem; color: #a3a3a3; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; max-width: 720px; }
+  button {
+    background: #171717; border: 1px solid #262626; border-radius: 10px; padding: 1.25rem 1rem;
+    color: #e5e5e5; font-size: 0.875rem; font-weight: 500; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  }
+  button:hover { background: #1c1c1c; border-color: #404040; }
+  button:active { transform: scale(0.97); }
+  button.playing { background: #1a1a2e; border-color: #4f46e5; }
+  .label { display: block; margin-bottom: 0.25rem; }
+  .meta { font-size: 0.7rem; color: #525252; }
+</style>
+</head>
+<body>
+
+<h1>UI Sound Preview</h1>
+<div class="grid">
+  <!-- Claude: Add or remove buttons to match generated sounds -->
+  <button onclick="playSound('click', this)"><span class="label">Click</span><span class="meta">50ms · noise</span></button>
+  <button onclick="playSound('toggle_on', this)"><span class="label">Toggle On</span><span class="meta">120ms · sine</span></button>
+  <button onclick="playSound('toggle_off', this)"><span class="label">Toggle Off</span><span class="meta">120ms · sine</span></button>
+  <button onclick="playSound('hover', this)"><span class="label">Hover</span><span class="meta">60ms · sine</span></button>
+  <button onclick="playSound('success', this)"><span class="label">Success</span><span class="meta">320ms · sine</span></button>
+  <button onclick="playSound('error', this)"><span class="label">Error</span><span class="meta">250ms · saw</span></button>
+  <button onclick="playSound('warning', this)"><span class="label">Warning</span><span class="meta">240ms · tri</span></button>
+  <button onclick="playSound('notification', this)"><span class="label">Notification</span><span class="meta">400ms · FM</span></button>
+  <button onclick="playSound('whoosh', this)"><span class="label">Whoosh</span><span class="meta">200ms · noise</span></button>
+  <button onclick="playSound('pop', this)"><span class="label">Pop</span><span class="meta">60ms · sine</span></button>
+</div>
+
+<script>
+// --- AudioContext singleton ---
+let audioCtx = null;
+function getAudioContext() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// --- Visual feedback ---
+function flash(btn) {
+  btn.classList.add('playing');
+  setTimeout(() => btn.classList.remove('playing'), 300);
+}
+
+// --- Sound registry ---
+// Claude: Replace or extend these functions with generated sounds
+const sounds = {
+  click() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 2000; f.Q.value = 2;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.3, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    src.connect(f); f.connect(g); g.connect(ctx.destination); src.start(now);
+  },
+  toggle_on() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(500, now); o.frequency.exponentialRampToValueAtTime(700, now + 0.12);
+    g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.13);
+  },
+  toggle_off() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(700, now); o.frequency.exponentialRampToValueAtTime(500, now + 0.12);
+    g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.13);
+  },
+  hover() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 2400;
+    g.gain.setValueAtTime(0.001, now); g.gain.exponentialRampToValueAtTime(0.08, now + 0.01); g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.07);
+  },
+  success() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    [0, 1].forEach(i => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = now + i * 0.2;
+      o.type = 'sine'; o.frequency.value = 523 * Math.pow(1.25, i);
+      g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.13);
+    });
+  },
+  error() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const o = ctx.createOscillator(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'sawtooth'; o.frequency.setValueAtTime(400, now); o.frequency.exponentialRampToValueAtTime(200, now + 0.25);
+    f.type = 'lowpass'; f.frequency.value = 1500;
+    g.gain.setValueAtTime(0.25, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    o.connect(f); f.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.26);
+  },
+  warning() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    [0, 1].forEach(i => {
+      const o = ctx.createOscillator(), g = ctx.createGain(), t = now + i * 0.16;
+      o.type = 'triangle'; o.frequency.value = 600;
+      g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+      o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + 0.09);
+    });
+  },
+  notification() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const mod = ctx.createOscillator(), mg = ctx.createGain();
+    mod.frequency.value = 880 * 1.4; mg.gain.setValueAtTime(1500, now); mg.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+    const car = ctx.createOscillator(), cg = ctx.createGain();
+    car.frequency.value = 880; cg.gain.setValueAtTime(0.25, now); cg.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    mod.connect(mg); mg.connect(car.frequency); car.connect(cg); cg.connect(ctx.destination);
+    mod.start(now); car.start(now); mod.stop(now + 0.41); car.stop(now + 0.41);
+  },
+  whoosh() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.2, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1;
+    f.frequency.setValueAtTime(500, now); f.frequency.exponentialRampToValueAtTime(4000, now + 0.2);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.001, now); g.gain.exponentialRampToValueAtTime(0.2, now + 0.06); g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    src.connect(f); f.connect(g); g.connect(ctx.destination); src.start(now);
+  },
+  pop() {
+    const ctx = getAudioContext(), now = ctx.currentTime;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(1200, now); o.frequency.exponentialRampToValueAtTime(300, now + 0.06);
+    g.gain.setValueAtTime(0.3, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+    o.connect(g); g.connect(ctx.destination); o.start(now); o.stop(now + 0.07);
+  }
+};
+
+function playSound(name, btn) {
+  if (sounds[name]) { sounds[name](); flash(btn); }
+}
+</script>
+</body>
+</html>
