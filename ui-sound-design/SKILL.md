@@ -34,7 +34,7 @@ If the user gives a vague request like "make a click sound", use sensible defaul
 
 ### 3. Listen
 
-Provide the HTML preview file so the user can open it in a browser and hear the sound immediately. Include labeled buttons for each sound variation. The preview must:
+Provide the HTML preview file so the user can open it in a browser and hear the sound immediately. Each sound includes a download button that exports a .wav file for use in production code or handoff to developers. Include labeled buttons for each sound variation. The preview must:
 - Handle AudioContext suspension (user gesture to start)
 - Use the singleton AudioContext pattern
 - Include visual feedback on play (the template handles this)
@@ -127,7 +127,7 @@ Capture `const now = ctx.currentTime` once at the start of each sound function. 
 ## Output Formats
 
 ### HTML Preview (default)
-Adapt `assets/sound-preview.html`. Self-contained, no dependencies, opens in any browser. Best for the iterative listen-refine loop.
+Adapt `assets/sound-preview.html`. Self-contained, no dependencies, opens in any browser. Best for the iterative listen-refine loop. Includes WAV download — click the download button on any sound to get a .wav file. Sound functions must use `(ctx, dest)` parameters with fallback defaults for download support, and each sound needs a matching entry in the `durations` map.
 
 ### ES Module
 ```javascript
