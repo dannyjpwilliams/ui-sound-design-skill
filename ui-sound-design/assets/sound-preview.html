@@ -4,44 +4,271 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UI Sound Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --background: hsl(0 0% 3.9%);
+    --foreground: hsl(0 0% 98%);
+    --card: hsl(0 0% 9%);
+    --card-foreground: hsl(0 0% 98%);
+    --muted-foreground: hsl(240 5% 64.9%);
+    --border: hsl(0 0% 14.9%);
+    --ring: hsl(0 0% 60%);
+    --playing: hsl(0 0% 70%);
+    --playing-glow: hsl(0 0% 100% / 0.07);
+    --radius: 0.375rem;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0a; color: #e5e5e5; min-height: 100vh; padding: 2rem; }
-  h1 { font-size: 1.25rem; font-weight: 500; margin-bottom: 1.5rem; color: #a3a3a3; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; max-width: 720px; }
-  button {
-    background: #171717; border: 1px solid #262626; border-radius: 10px; padding: 1.25rem 1rem;
-    color: #e5e5e5; font-size: 0.875rem; font-weight: 500; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    min-height: 100vh;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
-  button:hover { background: #1c1c1c; border-color: #404040; }
-  button:active { transform: scale(0.97); }
-  button.playing { background: #1a1a2e; border-color: #4f46e5; }
-  .label { display: block; margin-bottom: 0.25rem; }
-  .meta { font-size: 0.7rem; color: #525252; }
+
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .title {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .badge {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    opacity: 0.6;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.875rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--foreground);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    background: hsl(0 0% 12%);
+    border-color: hsl(0 0% 25%);
+  }
+
+  .btn-secondary:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  .btn-secondary svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+    color: var(--card-foreground);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .card:hover {
+    background: hsl(0 0% 11%);
+    border-color: hsl(0 0% 20%);
+  }
+
+  .card:active {
+    transform: scale(0.98);
+    transition-duration: 0.05s;
+  }
+
+  .card:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @keyframes playing-pulse {
+    0%, 100% { box-shadow: 0 0 0 1px var(--playing), 0 0 20px var(--playing-glow), inset 0 0 12px var(--playing-glow); }
+    50% { box-shadow: 0 0 0 1px var(--playing), 0 0 30px hsl(0 0% 100% / 0.1), inset 0 0 20px hsl(0 0% 100% / 0.06); }
+  }
+
+  .card.playing {
+    border-color: var(--playing);
+    background: hsl(0 0% 11%);
+    animation: playing-pulse 0.6s ease-in-out;
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+
+  .label {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.01em;
+  }
+
+  .meta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+  }
+
   .dl {
-    display: inline-block; margin-top: 0.5rem; padding: 0.15rem 0.5rem;
-    font-size: 0.7rem; color: #525252; border: 1px solid #262626; border-radius: 4px;
-    cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border);
+    color: var(--muted-foreground);
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
   }
-  .dl:hover { color: #a3a3a3; border-color: #404040; }
+
+  .dl:hover {
+    color: var(--foreground);
+    border-color: hsl(0 0% 25%);
+    background: hsl(0 0% 12%);
+  }
+
+  .dl svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+  }
+
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    opacity: 0.5;
+  }
 </style>
 </head>
 <body>
 
-<h1>UI Sound Preview</h1>
-<div class="grid">
-  <!-- Claude: Add or remove buttons to match generated sounds. Each button needs a matching entry in the durations map. -->
-  <button onclick="playSound('click', this)"><span class="label">Click</span><span class="meta">50ms · noise</span><span class="dl" onclick="event.stopPropagation(); downloadSound('click')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('toggle_on', this)"><span class="label">Toggle On</span><span class="meta">120ms · sine</span><span class="dl" onclick="event.stopPropagation(); downloadSound('toggle_on')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('toggle_off', this)"><span class="label">Toggle Off</span><span class="meta">120ms · sine</span><span class="dl" onclick="event.stopPropagation(); downloadSound('toggle_off')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('hover', this)"><span class="label">Hover</span><span class="meta">60ms · sine</span><span class="dl" onclick="event.stopPropagation(); downloadSound('hover')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('success', this)"><span class="label">Success</span><span class="meta">320ms · sine</span><span class="dl" onclick="event.stopPropagation(); downloadSound('success')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('error', this)"><span class="label">Error</span><span class="meta">250ms · saw</span><span class="dl" onclick="event.stopPropagation(); downloadSound('error')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('warning', this)"><span class="label">Warning</span><span class="meta">240ms · tri</span><span class="dl" onclick="event.stopPropagation(); downloadSound('warning')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('notification', this)"><span class="label">Notification</span><span class="meta">400ms · FM</span><span class="dl" onclick="event.stopPropagation(); downloadSound('notification')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('whoosh', this)"><span class="label">Whoosh</span><span class="meta">200ms · noise</span><span class="dl" onclick="event.stopPropagation(); downloadSound('whoosh')" title="Download WAV">&#x2913; wav</span></button>
-  <button onclick="playSound('pop', this)"><span class="label">Pop</span><span class="meta">60ms · sine</span><span class="dl" onclick="event.stopPropagation(); downloadSound('pop')" title="Download WAV">&#x2913; wav</span></button>
+<div class="container">
+
+  <header class="header">
+    <div class="header-left">
+      <h1 class="title">UI Sound Preview</h1>
+      <span class="badge mono" id="sound-count"></span>
+    </div>
+    <button class="btn-secondary" onclick="downloadAll()" title="Download all sounds as WAV files">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download All
+    </button>
+  </header>
+
+  <div class="divider"></div>
+
+  <div class="grid" role="group" aria-label="Sound preview buttons">
+    <!-- Claude: Add or remove buttons to match generated sounds. Each button needs a matching entry in the durations map.
+         Button pattern:
+         <button class="card" onclick="playSound('sound_name', this)">
+           <div class="card-content"><span class="label">Sound Name</span><span class="meta mono">50ms · sine</span></div>
+           <span class="dl" onclick="event.stopPropagation(); downloadSound('sound_name')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
+         </button>
+    -->
+    <button class="card" onclick="playSound('click', this)"><div class="card-content"><span class="label">Click</span><span class="meta mono">50ms · noise</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('click')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('toggle_on', this)"><div class="card-content"><span class="label">Toggle On</span><span class="meta mono">120ms · sine</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('toggle_on')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('toggle_off', this)"><div class="card-content"><span class="label">Toggle Off</span><span class="meta mono">120ms · sine</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('toggle_off')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('hover', this)"><div class="card-content"><span class="label">Hover</span><span class="meta mono">60ms · sine</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('hover')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('success', this)"><div class="card-content"><span class="label">Success</span><span class="meta mono">320ms · sine</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('success')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('error', this)"><div class="card-content"><span class="label">Error</span><span class="meta mono">250ms · saw</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('error')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('warning', this)"><div class="card-content"><span class="label">Warning</span><span class="meta mono">240ms · tri</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('warning')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('notification', this)"><div class="card-content"><span class="label">Notification</span><span class="meta mono">400ms · FM</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('notification')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('whoosh', this)"><div class="card-content"><span class="label">Whoosh</span><span class="meta mono">200ms · noise</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('whoosh')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+    <button class="card" onclick="playSound('pop', this)"><div class="card-content"><span class="label">Pop</span><span class="meta mono">60ms · sine</span></div><span class="dl" onclick="event.stopPropagation(); downloadSound('pop')" title="Download WAV" aria-label="Download WAV"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
+  </div>
+
+  <footer class="footer">
+    <span class="mono">Web Audio API</span>
+    <span>·</span>
+    <span class="mono">44.1kHz WAV</span>
+  </footer>
+
 </div>
 
 <script>
@@ -54,9 +281,10 @@ function getAudioContext() {
 }
 
 // --- Visual feedback ---
-function flash(btn) {
+function flash(btn, name) {
   btn.classList.add('playing');
-  setTimeout(() => btn.classList.remove('playing'), 300);
+  const dur = (durations[name] || 0.3) * 1000;
+  setTimeout(() => btn.classList.remove('playing'), Math.max(dur, 200));
 }
 
 // --- Duration map (seconds) ---
@@ -168,7 +396,7 @@ const sounds = {
 };
 
 function playSound(name, btn) {
-  if (sounds[name]) { sounds[name](); flash(btn); }
+  if (sounds[name]) { sounds[name](); flash(btn, name); }
 }
 
 // --- WAV encoder ---
@@ -223,6 +451,18 @@ async function downloadSound(name) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+// --- Download All ---
+async function downloadAll() {
+  const names = Object.keys(sounds);
+  for (const name of names) {
+    await downloadSound(name);
+    await new Promise(r => setTimeout(r, 100));
+  }
+}
+
+// --- Auto-update sound count badge ---
+document.getElementById('sound-count').textContent = Object.keys(sounds).length + ' sounds';
 </script>
 </body>
 </html>
