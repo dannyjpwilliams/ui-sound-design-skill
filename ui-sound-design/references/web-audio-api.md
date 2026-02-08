@@ -346,6 +346,29 @@ gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
 **Problem:** Audio nodes are not garbage collected while connected.
 **Fix:** Oscillators auto-disconnect after `stop()`. For long-lived nodes, call `disconnect()` when done. BufferSource nodes are one-shot — create a new one each time.
 
+### BufferSource cleanup with `onended`
+
+BufferSourceNodes (used for noise-based sounds like clicks and whooshes) do not auto-disconnect their downstream nodes. Use the `onended` callback to clean up the entire signal chain:
+
+```javascript
+const source = ctx.createBufferSource();
+const filter = ctx.createBiquadFilter();
+const gain = ctx.createGain();
+
+source.connect(filter);
+filter.connect(gain);
+gain.connect(ctx.destination);
+source.start(now);
+
+source.onended = () => {
+  source.disconnect();
+  filter.disconnect();
+  gain.disconnect();
+};
+```
+
+This prevents filter and gain nodes from accumulating in memory across repeated plays. See rule `node-cleanup` in `audio-rules.md`.
+
 ### exponentialRamp to zero
 **Problem:** `exponentialRampToValueAtTime(0, ...)` throws because you can't exponentially approach 0.
 **Fix:** Always ramp to `0.001` instead. It's inaudible but mathematically valid.
@@ -357,3 +380,34 @@ gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.02);
 ### Scheduling in the past
 **Problem:** Using `ctx.currentTime` across multiple lines — time advances between reads.
 **Fix:** Capture `const now = ctx.currentTime;` once at the start and derive all times from `now`.
+
+## Per-Sound-Type Parameter Bounds
+
+Quick reference for safe parameter ranges across all 9 UI sound categories. Values outside these ranges are almost always wrong. See `audio-rules.md` for the full rule definitions.
+
+| Category | Duration | Volume | Filter Q | Attack | Key Constraint |
+|----------|----------|--------|----------|--------|----------------|
+| Click | 10–80ms | 0.1–0.6 | 0.5–10 | 0ms | Noise source, not oscillator |
+| Toggle | 80–200ms | 0.1–0.4 | — | 0ms | Sweep direction = state |
+| Hover | 30–80ms | 0.03–0.08 | — | 5–15ms | Must be subliminal |
+| Success | 200–500ms | 0.15–0.5 | — | 0ms | Ascending interval |
+| Error | 150–400ms | 0.15–0.4 | 0.5–3 | 0ms | Descending, dark timbre |
+| Warning | 150–350ms | 0.15–0.4 | — | 0ms | Double pulse |
+| Notification | 200–800ms | 0.15–0.4 | — | 0ms | FM synthesis |
+| Whoosh | 100–400ms | 0.1–0.4 | 0.5–5 | — | Noise + filter sweep |
+| Pop | 30–80ms | 0.15–0.5 | — | 0ms | Rapid pitch drop |
+
+## Validation Checklist
+
+Self-check for generated Web Audio code. Every item should pass before shipping.
+
+- [ ] **Singleton context** — Uses shared `getAudioContext()`, never `new AudioContext()` per sound
+- [ ] **Suspended check** — Calls `resume()` if context state is `'suspended'`
+- [ ] **`setValueAtTime` before ramp** — Every `exponentialRampToValueAtTime` / `linearRampToValueAtTime` has a preceding `setValueAtTime`
+- [ ] **No ramp to zero** — All exponential ramps target `0.001`, never `0`
+- [ ] **Single `currentTime` capture** — `const now = ctx.currentTime` captured once, all scheduling derived from `now`
+- [ ] **Oscillator stop padding** — `osc.stop(now + duration + 0.01)` — at least 0.01s after envelope ends
+- [ ] **Volume ceiling** — No gain value exceeds `0.8`
+- [ ] **Exponential ramps** — Using `exponentialRampToValueAtTime` for durations > 50ms
+- [ ] **BufferSource cleanup** — Noise-based sounds use `source.onended` to disconnect filter/gain nodes
+- [ ] **Duration in range** — Sound duration falls within the bounds for its category (see table above)

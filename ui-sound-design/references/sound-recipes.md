@@ -62,6 +62,8 @@ function playClick({ frequency = 2000, Q = 2, duration = 0.05, volume = 0.3 } = 
 - **Hard click:** `{ frequency: 4000, Q: 6, duration: 0.03, volume: 0.4 }`
 - **Keyboard click:** `{ frequency: 3500, Q: 8, duration: 0.025, volume: 0.25 }`
 
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `noise-for-percussion`, `volume-max-0.8`
+
 ---
 
 ## Toggle {#toggle}
@@ -106,6 +108,8 @@ function playToggle(isOn, { duration = 0.12, volume = 0.25 } = {}) {
 - **Retro toggle:** Square wave, range 400–800, duration 0.1
 - **Smooth toggle:** Triangle wave, range 450–750, duration 0.15
 
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
+
 ---
 
 ## Hover {#hover}
@@ -146,6 +150,8 @@ function playHover({ frequency = 2400, duration = 0.06, volume = 0.08 } = {}) {
 **Variations:**
 - **Glass hover:** `{ frequency: 3200, duration: 0.08, volume: 0.06 }`
 - **Warm hover:** Triangle wave, `{ frequency: 1800, duration: 0.07, volume: 0.1 }`
+
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
 
 ---
 
@@ -194,6 +200,8 @@ function playSuccess({ baseFreq = 523, interval = 1.25, noteDuration = 0.12, gap
 - **Triumphant:** Three notes ascending a major triad: baseFreq, ×1.25, ×1.5
 - **Gentle ding:** Single triangle note at 880Hz, duration 0.3, volume 0.2
 - **Sparkle:** Sine at 1047Hz, quick decay, add second oscillator detuned +7 cents
+
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
 
 ---
 
@@ -246,6 +254,8 @@ function playError({ startFreq = 400, endFreq = 200, filterFreq = 1500, duration
 - **Critical error:** Sawtooth, 500→150Hz, filterFreq 2500, two pulses with 0.1s gap
 - **Validation error:** Triangle, 300→220Hz, duration 0.15, very quiet (0.12)
 
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `filter-for-character`, `volume-max-0.8`
+
 ---
 
 ## Warning {#warning}
@@ -291,6 +301,8 @@ function playWarning({ frequency = 600, pulseDuration = 0.08, gap = 0.08, volume
 - **Subtle warning:** Sine, 500Hz, single pulse, duration 0.15, volume 0.15
 - **Urgent warning:** Triangle, 750Hz, three pulses, gap 0.05
 - **Advisory tone:** Sine, 550Hz, two pulses, long gap (0.15)
+
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
 
 ---
 
@@ -345,6 +357,8 @@ function playNotification({ frequency = 880, modRatio = 1.4, modDepth = 1500, du
 - **Soft bell:** `{ frequency: 660, modRatio: 1.2, modDepth: 500, duration: 0.6, volume: 0.15 }`
 - **Alert ping:** `{ frequency: 1100, modRatio: 2.0, modDepth: 2000, duration: 0.2, volume: 0.3 }`
 
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
+
 ---
 
 ## Whoosh {#whoosh}
@@ -398,6 +412,8 @@ function playWhoosh({ startFilterFreq = 500, endFilterFreq = 4000, duration = 0.
 - **Heavy swoosh:** duration 0.3, range 200→2000, Q 2
 - **Reverse (slide in):** range 4000→500, duration 0.2
 
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `exponential-over-linear`, `noise-for-percussion`, `filter-for-character`, `volume-max-0.8`
+
 ---
 
 ## Pop {#pop}
@@ -440,6 +456,8 @@ function playPop({ startFreq = 1200, endFreq = 300, duration = 0.06, volume = 0.
 - **Bubble pop:** `{ startFreq: 2000, endFreq: 400, duration: 0.08, volume: 0.25 }`
 - **Deep pop:** `{ startFreq: 600, endFreq: 100, duration: 0.1, volume: 0.35 }`
 - **Light tap:** `{ startFreq: 1500, endFreq: 500, duration: 0.04, volume: 0.2 }`
+
+**Rules followed:** `context-singleton`, `gain-no-zero-target`, `gain-set-before-ramp`, `scheduling-capture-once`, `stop-after-envelope`, `exponential-over-linear`, `oscillator-for-tonal`, `volume-max-0.8`
 
 ---
 

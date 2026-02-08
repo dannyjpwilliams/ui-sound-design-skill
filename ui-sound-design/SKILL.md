@@ -9,7 +9,7 @@ Translate plain-English sound descriptions into working Web Audio API code. No a
 
 ## Workflow
 
-Every sound follows this loop: **Describe → Generate → Listen → Refine**
+Every sound follows this loop: **Describe → Generate → Listen → Refine** (with optional **Review** for auditing existing code)
 
 ### 1. Describe
 
@@ -47,6 +47,19 @@ When the user gives feedback, translate it using the vocabulary bridge and adjus
 - "Too much/little" → scale the relevant parameter up/down
 - "More like X" → identify what makes X distinctive and match those characteristics
 
+### 5. Review (optional)
+
+Enter review mode when the user says "review", "audit", or "check my sound code", or pastes existing Web Audio code for evaluation.
+
+**Steps:**
+1. Load rules from `references/audio-rules.md`
+2. Scan the code against each rule, starting with Critical priority
+3. Report findings using the format in `audio-rules.md` — one line per violation with `file:line — [rule-id] description`
+4. Provide a summary table (pass/fail counts by priority)
+5. Suggest concrete fixes for each failing rule
+
+**When to stay in generate mode:** If the user's request is ambiguous (e.g., "here's my click sound" without asking for review), default to the generative workflow. Only enter review mode when the intent to audit is clear.
+
 ## Vocabulary Bridge
 
 This is the core translation layer. When the user uses subjective language, map it to synthesis parameters:
@@ -74,15 +87,15 @@ This is the core translation layer. When the user uses subjective language, map 
 
 | Category | Duration | Recipe | Trigger | Key Character |
 |----------|----------|--------|---------|---------------|
-| Click | 30–100ms | `references/sound-recipes.md#click` | Button press, tap | Noise burst, bandpass filtered |
+| Click | 10–80ms | `references/sound-recipes.md#click` | Button press, tap | Noise burst, bandpass filtered |
 | Toggle | 80–200ms | `references/sound-recipes.md#toggle` | Switch on/off | Rising/falling pitch sweep |
-| Hover | 30–100ms | `references/sound-recipes.md#hover` | Mouse enter | Gentle, nearly subliminal |
+| Hover | 30–80ms | `references/sound-recipes.md#hover` | Mouse enter | Gentle, nearly subliminal |
 | Success | 200–500ms | `references/sound-recipes.md#success` | Task complete, save | Ascending major third |
 | Error | 150–400ms | `references/sound-recipes.md#error` | Validation fail, rejected | Descending, buzzy |
 | Warning | 150–350ms | `references/sound-recipes.md#warning` | Caution state | Double pulse, mid-range |
 | Notification | 200–800ms | `references/sound-recipes.md#notification` | New message, alert | Bell-like FM synthesis |
 | Whoosh | 100–400ms | `references/sound-recipes.md#whoosh` | Page transition, slide | Filtered noise sweep |
-| Pop | 30–100ms | `references/sound-recipes.md#pop` | Add item, bubble, appear | Sine with pitch drop |
+| Pop | 30–80ms | `references/sound-recipes.md#pop` | Add item, bubble, appear | Sine with pitch drop |
 | Custom | varies | `references/web-audio-api.md` | Anything else | Compose from building blocks |
 
 ## Critical Implementation Rules
@@ -102,7 +115,7 @@ Browsers block audio until a user interaction (click, tap, keydown). Always init
 ### Volume safety
 - Default volume: `0.3` (gain value)
 - Maximum volume: `0.8` — never exceed this
-- Hover sounds: `0.03–0.15` (barely perceptible)
+- Hover sounds: `0.03–0.08` (barely perceptible)
 - UI sounds should complement, not dominate — err on the side of quiet
 
 ### Scheduling precision
@@ -141,6 +154,7 @@ Use the `UISoundLibrary` class from `references/sound-recipes.md`. Bundles all s
 ### references/
 - **`web-audio-api.md`** — Core Web Audio API building blocks: oscillators, envelopes, filters, noise, FM synthesis, factory patterns, common mistakes. Load when building custom sounds or understanding low-level mechanics.
 - **`sound-recipes.md`** — Complete working implementations for all 9 sound categories plus a bundled `UISoundLibrary` class. Each recipe includes parameters, code, tuning guide, and variations. **Start here for most requests.**
+- **`audio-rules.md`** — Formal validation rules with IDs, priorities, and pass/fail examples. Load when reviewing existing code or when you need to verify generated output against best practices.
 - **`tone-js.md`** — Tone.js abstractions for faster prototyping. Simplified synth types, recipe equivalents, effects, and a conversion guide to vanilla Web Audio. Load when the user prefers Tone.js or wants rapid iteration.
 
 ### assets/
