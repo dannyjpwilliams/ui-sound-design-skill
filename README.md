@@ -24,15 +24,12 @@ The workflow is iterative: **Describe** the sound in plain language, **Generate*
 
 ## Try It
 
-Open [`ui-sound-design/assets/sound-preview.html`](ui-sound-design/assets/sound-preview.html) in any browser. No install needed — click the buttons to hear all 10 default sounds.
+Open [`skills/ui-sound-design/assets/sound-preview.html`](skills/ui-sound-design/assets/sound-preview.html) in any browser. No install needed — click the buttons to hear all 10 default sounds.
 
 ## Install
 
-Clone the repo and symlink (or copy) the skill directory into your Claude Code skills folder:
-
 ```bash
-git clone https://github.com/dannyjpwilliams/ui-sound-design-skill.git
-ln -s "$(pwd)/ui-sound-design-skill/ui-sound-design" ~/.claude/skills/ui-sound-design
+npx skills add dannyjpwilliams/ui-sound-design-skill
 ```
 
 Claude Code will automatically detect the skill on your next conversation.
@@ -79,7 +76,7 @@ The full vocabulary bridge and all recipes are embedded in the skill files, so C
 ## Skill Structure
 
 ```
-ui-sound-design/
+skills/ui-sound-design/
 ├── SKILL.md                   # Skill definition — workflow, vocabulary bridge, rules
 ├── references/
 │   ├── sound-recipes.md       # 9 complete sound implementations + UISoundLibrary class
