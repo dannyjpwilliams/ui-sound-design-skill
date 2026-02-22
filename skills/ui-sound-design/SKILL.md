@@ -1,7 +1,22 @@
 ---
 name: ui-sound-design
 description: "Programmatic UI sound design using Web Audio API and Tone.js. Use when creating click sounds, notification chimes, toggle feedback, hover sounds, success/error audio, whoosh effects, or building a sound library for UI interactions. Provides an iterative describe-generate-listen-refine workflow with audio engineering knowledge translated into plain English."
+license: MIT
+metadata:
+  author: dannyjpwilliams
+  version: "1.0"
 ---
+
+```
+    ▁▂▄▆█▆▄▂▁
+
+█  █ ██ ▄██▀ ██▀▄
+█  █ ██  ▀▄  ██ █
+▀██▀ ██ ▀██▄ ██▄▀
+```
+
+Describe what your UI should sound like.
+Preview it, tweak it, and download it from the browser.
 
 # UI Sound Design
 
