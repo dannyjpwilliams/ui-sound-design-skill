@@ -1,10 +1,10 @@
 # UI Sound Design Skill
 
-A [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skill that translates plain-English sound descriptions into working Web Audio API and Tone.js code. No audio engineering background needed.
+An [Agent Skill](https://agentskills.io) that translates plain-English sound descriptions into working Web Audio API and Tone.js code. Works with Claude Code, Cursor, VS Code/Copilot, Windsurf, Codex, Goose, and [30+ other AI coding tools](https://agentskills.io/specification). No audio engineering background needed.
 
 ## What It Does
 
-Describe what you want to hear, and Claude generates production-ready sound synthesis code.
+Describe what you want to hear, and your AI agent generates production-ready sound synthesis code.
 
 The workflow is iterative: **Describe** the sound in plain language, **Generate** the code, **Listen** in-browser, **Refine** with feedback like "make it snappier" or "warmer". The skill handles the translation from subjective language to synthesis parameters.
 
@@ -32,11 +32,25 @@ Open [`skills/ui-sound-design/assets/sound-preview.html`](skills/ui-sound-design
 npx skills add dannyjpwilliams/ui-sound-design-skill
 ```
 
-Claude Code will automatically detect the skill on your next conversation.
+The CLI auto-detects your installed AI coding tools and installs the skill to all of them.
+
+## Compatibility
+
+This skill follows the [Agent Skills](https://agentskills.io/specification) open standard and works with any compatible AI coding tool, including:
+
+- **Claude Code** — `.claude/skills/`
+- **Cursor** — `.cursor/skills/`
+- **VS Code / GitHub Copilot** — `.github/skills/`
+- **Windsurf** — `.windsurf/skills/`
+- **Codex CLI** — `.codex/skills/`
+- **Goose** — `.goose/skills/`
+- **Gemini CLI**, **Roo Code**, **Trae**, and others
+
+`npx skills add` handles the correct installation path for each tool automatically.
 
 ## Usage
 
-Ask Claude to design sounds using natural language:
+Ask your AI agent to design sounds using natural language:
 
 ```
 "Make a click sound for a settings toggle — subtle, professional"
@@ -54,7 +68,7 @@ Ask Claude to design sounds using natural language:
 "Build me a complete UI sound library with click, hover, success, and error sounds. Output as an ES module."
 ```
 
-Claude will generate an HTML preview you can open in your browser, then refine based on your feedback ("make it warmer", "shorter", "more playful").
+Your agent will generate an HTML preview you can open in your browser, then refine based on your feedback ("make it warmer", "shorter", "more playful").
 
 ## How It Works
 
@@ -71,7 +85,7 @@ The skill acts as a **vocabulary bridge** between subjective language and audio 
 | "More professional" | Lower volume, sine wave, short duration |
 | "Retro / 8-bit" | Square wave, quantized pitch |
 
-The full vocabulary bridge and all recipes are embedded in the skill files, so Claude has the synthesis knowledge to translate any description.
+The full vocabulary bridge and all recipes are embedded in the skill files, so any compatible agent has the synthesis knowledge to translate any description.
 
 ## Skill Structure
 
