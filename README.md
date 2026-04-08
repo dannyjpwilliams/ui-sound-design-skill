@@ -88,6 +88,18 @@ Ask your AI agent to design sounds using natural language:
 
 Your agent will generate an HTML preview you can open in your browser, then refine based on your feedback ("make it warmer", "shorter", "more playful").
 
+### Audio File References
+
+Have a sound you want to match? Use it as a style reference:
+
+```bash
+node skills/ui-sound-design/tools/analyze-sound.mjs path/to/reference.wav
+```
+
+The analyzer extracts a detailed sound profile — duration, envelope, spectral content, harmonics, brightness — and maps it to synthesis parameters. Paste the output into your conversation, and your agent uses it as the starting point for synthesis. Then refine as usual.
+
+Supports `.wav` natively. Other formats (`.mp3`, `.ogg`, `.flac`) require [ffmpeg](https://ffmpeg.org). Zero npm dependencies — just Node.js.
+
 ## How It Works
 
 The skill acts as a **vocabulary bridge** between subjective language and audio synthesis parameters:
@@ -109,13 +121,16 @@ The full vocabulary bridge and all recipes are embedded in the skill files, so a
 
 ```
 skills/ui-sound-design/
-├── SKILL.md                   # Skill definition — workflow, vocabulary bridge, rules
+├── SKILL.md                        # Skill definition — workflow, vocabulary bridge, rules
 ├── references/
-│   ├── sound-recipes.md       # 9 complete sound implementations + UISoundLibrary class
-│   ├── web-audio-api.md       # Web Audio API building blocks and patterns
-│   └── tone-js.md             # Tone.js patterns and vanilla conversion guide
-└── assets/
-    └── sound-preview.html     # Self-contained HTML demo with all 10 sounds
+│   ├── sound-recipes.md            # 9 complete sound implementations + UISoundLibrary class
+│   ├── web-audio-api.md            # Web Audio API building blocks and patterns
+│   ├── audio-file-references.md    # Guide for interpreting audio file analysis profiles
+│   └── tone-js.md                  # Tone.js patterns and vanilla conversion guide
+├── assets/
+│   └── sound-preview.html          # Self-contained HTML demo with all 10 sounds
+└── tools/
+    └── analyze-sound.mjs           # CLI audio analyzer (zero dependencies)
 ```
 
 ## License

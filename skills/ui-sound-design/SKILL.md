@@ -46,6 +46,20 @@ The user describes the sound in plain language. Ask clarifying questions using t
 2. **What's the emotional tone?** (satisfying, subtle, urgent, playful, professional, minimal)
 3. **How prominent should it be?** (barely perceptible, noticeable, attention-grabbing)
 4. **Any reference points?** (iOS keyboard, Slack notification, macOS trash, game UI, "like a bubble popping")
+5. **Have an audio reference file?** If the user has a .wav or .mp3 file they want to match, direct them to run the analyzer:
+
+   ```
+   node skills/ui-sound-design/tools/analyze-sound.mjs path/to/reference.wav
+   ```
+
+   Then paste the output back. When a sound profile is provided:
+   1. Load `references/audio-file-references.md` for interpretation guidance
+   2. Read the `synthesis_suggestion` block for initial parameters
+   3. Match to the closest **sound category** using `recipe_starting_point`
+   4. Load that recipe from `references/sound-recipes.md`
+   5. Override recipe defaults with the profile's suggested parameters
+   6. Apply any vocabulary bridge terms from the profile's `VOCABULARY MATCH` section
+   7. Proceed to Generate as normal
 
 If the user gives a vague request like "make a click sound", use sensible defaults from the recipes and generate immediately — don't over-ask.
 
@@ -181,6 +195,10 @@ Use the `UISoundLibrary` class from `references/sound-recipes.md`. Bundles all s
 - **`sound-recipes.md`** — Complete working implementations for all 9 sound categories plus a bundled `UISoundLibrary` class. Each recipe includes parameters, code, tuning guide, and variations. **Start here for most requests.**
 - **`audio-rules.md`** — Formal validation rules with IDs, priorities, and pass/fail examples. Load when reviewing existing code or when you need to verify generated output against best practices.
 - **`tone-js.md`** — Tone.js abstractions for faster prototyping. Simplified synth types, recipe equivalents, effects, and a conversion guide to vanilla Web Audio. Load when the user prefers Tone.js or wants rapid iteration.
+- **`audio-file-references.md`** — How to interpret sound profiles from the `analyze-sound.mjs` CLI tool. Maps audio analysis metrics to synthesis parameters and recipe selection. Load when the user provides a sound profile from an audio file reference.
 
 ### assets/
 - **`sound-preview.html`** — Self-contained HTML template with all 10 default sounds, visual feedback, and AudioContext handling. Adapt this for every preview output.
+
+### tools/
+- **`analyze-sound.mjs`** — CLI script that analyzes .wav/.mp3 files and outputs a sound profile. Run with `node tools/analyze-sound.mjs <file>`. Zero dependencies — works with any Node.js installation. Supports .wav natively; other formats require ffmpeg. Outputs duration, envelope, spectral content, tonality, and a synthesis suggestion that maps directly to recipe parameters.
